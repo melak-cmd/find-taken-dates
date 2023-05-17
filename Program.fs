@@ -6,6 +6,18 @@ open System.Drawing
 open System
 open System.Collections.Generic
 
+// A function to get the PropertyTagExifDTOrig of a picture file
+let getExifDate (fileName: string) =
+  // Use System.Drawing.Image to get the image metadata
+  let image = System.Drawing.Image.FromFile(fileName)
+  // Use System.Drawing.Imaging.PropertyItem to get the PropertyTagExifDTOrig property
+  let propItem = image.GetPropertyItem(36867) // 36867 is the ID for PropertyTagExifDTOrig
+  // Convert the property value to a string
+  let exifDate = System.Text.Encoding.ASCII.GetString(propItem.Value)
+  // Trim the null character at the end
+  //exifDate.TrimEnd('\u0000')
+  Some exifDate
+  
 // Define a function to get the taken date of a picture file
 let getTakenDate (filename: string) =
   // Try to open the file as an image
@@ -44,7 +56,7 @@ let printTakenDates (dir: string) =
   let pictureFiles = findPictureFiles dir
   // For each picture file, get its taken date and print it
   for file in pictureFiles do
-    let takenDate = getTakenDate file
+    let takenDate = getExifDate file
     match takenDate with
     | Some date -> printfn "%s was taken on %s" file date
     | None -> printfn "%s has no taken date" file
